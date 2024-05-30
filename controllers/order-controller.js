@@ -6,7 +6,7 @@ import userModel from "../models/user-model.js";
 
 // Place an order
 const placeOrder = async (req, res) => {
-    const frontEnd_url = "http://localhost:3000";
+    const frontEnd_url = "https://food-del-psi.vercel.app";
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     try {
         // Create a new order
