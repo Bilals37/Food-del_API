@@ -86,32 +86,12 @@ const verifyOrder = async (req, res) => {
 const userOrder = async (req, res) => {
     try {
         const orders = await orderModel.find({ userId: req.body.userId });
-
-        // Aggregate items within each order
-        const formattedOrders = orders.map(order => {
-            let totalItems = 0;
-            order.items.forEach(item => {
-                totalItems += item.quantity;
-            });
-            return {
-                _id: order._id,
-                userId: order.userId,
-                totalItems: totalItems,
-                amount: order.amount,
-                address: order.address,
-                payment: order.payment,
-                status: order.status,
-                createdAt: order.createdAt,
-                updatedAt: order.updatedAt
-            };
-        });
-
-        res.status(200).json({ success: true, data: formattedOrders });
+        res.status(200).json({ success: true, data: orders });
     } catch (error) {
         console.error('Error fetching user orders:', error);
         res.status(500).json({ success: false, message: "Error fetching user orders" });
     }
-};
+}
 
 
 // Handler to list all orders (for admin panel)
