@@ -1,5 +1,6 @@
 import foodModel from "../models/food-model.js";
 import fs from 'fs';
+import path from 'path';
 
 // Add food item
 const addFood = async (req, res) => {
@@ -50,7 +51,8 @@ const removeFood = async (req, res) => {
             return res.status(404).json({ success: false, message: "Food item not found" });
         }
         // Remove the food item's image file
-        fs.unlink(`uploads/${food.image}`, (err) => {
+        const imagePath = path.join('/tmp/uploads', food.image);
+        fs.unlink(imagePath, (err) => {
             if (err) {
                 console.error(err);
                 // If there is an error deleting the image, send an error response
