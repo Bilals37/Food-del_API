@@ -5,21 +5,9 @@ import userModel from "../models/user-model.js";
 // Handler to place a new order
 const placeOrder = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const frontEnd_url = process.env.FRONTEND_URL
-    // const frontEnd_url = "http://localhost:3000";
+    const frontEnd_url = process.env.FRONTEND_URL;
+
     try {
-        // Create a new order
-        const neworder = new orderModel({
-            userId: req.body.userId,
-            items: req.body.items,
-            amount: req.body.amount,
-            address: req.body.address
-        });
-        await neworder.save();
-
-        // Clear the user's cart after saving the order
-        await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
-
         // Create line items for Stripe payment
         const line_items = req.body.items.map((item) => ({
             price_data: {
@@ -57,8 +45,8 @@ const placeOrder = async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             line_items: line_items,
             mode: 'payment',
-            success_url: `${frontEnd_url}/verify?success=true&orderId=${neworder._id}`,
-            cancel_url: `${frontEnd_url}/verify?success=false&orderId=${neworder._id}`,
+            success_url: `${frontEnd_url}/verify?success=true`,
+            cancel_url: `${frontEnd_url}/verify?success=false`,
         });
 
         // Respond with the session URL
@@ -69,6 +57,7 @@ const placeOrder = async (req, res) => {
     }
 };
 
+
 // Handler to verify the order payment
 const verifyOrder = async (req, res) => {
     const { orderId, success } = req.body;
@@ -76,6 +65,10 @@ const verifyOrder = async (req, res) => {
         if (success === "true") {
             // Mark the order as paid
             await orderModel.findByIdAndUpdate(orderId, { payment: true });
+
+            // Clear the user's cart after successful payment
+            await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
+
             res.status(200).json({ success: true, message: "Payment Successful" });
         } else {
             // Delete the order if payment failed
@@ -88,16 +81,38 @@ const verifyOrder = async (req, res) => {
     }
 };
 
+
 // Handler to get orders for a specific user
 const userOrder = async (req, res) => {
     try {
         const orders = await orderModel.find({ userId: req.body.userId });
-        res.status(200).json({ success: true, data: orders });
+
+        // Aggregate items within each order
+        const formattedOrders = orders.map(order => {
+            let totalItems = 0;
+            order.items.forEach(item => {
+                totalItems += item.quantity;
+            });
+            return {
+                _id: order._id,
+                userId: order.userId,
+                totalItems: totalItems,
+                amount: order.amount,
+                address: order.address,
+                payment: order.payment,
+                status: order.status,
+                createdAt: order.createdAt,
+                updatedAt: order.updatedAt
+            };
+        });
+
+        res.status(200).json({ success: true, data: formattedOrders });
     } catch (error) {
         console.error('Error fetching user orders:', error);
         res.status(500).json({ success: false, message: "Error fetching user orders" });
     }
-}
+};
+
 
 // Handler to list all orders (for admin panel)
 const listOrders = async (req, res) => {
