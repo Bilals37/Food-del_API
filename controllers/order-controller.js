@@ -5,7 +5,8 @@ import userModel from "../models/user-model.js";
 // Handler to place a new order
 const placeOrder = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const frontEnd_url = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontEnd_url = process.env.FRONTEND_URL
+    // const frontEnd_url = "http://localhost:3000";
     try {
         // Create a new order
         const neworder = new orderModel({
