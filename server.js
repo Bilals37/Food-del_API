@@ -24,7 +24,7 @@ connectDB(); // Call function to connect to the database
 
 // Define API Endpoints
 app.use("/api/food", foodRouter); // Food-related API endpoints
-app.use("/images", express.static('uploads')); // Serve static images from 'uploads' directory
+app.use("/images", express.static('tmp/uploads')); // Serve static images from 'uploads' directory
 app.use("/api/user", userRouter); // User-related API endpoints
 app.use("/api/cart", cartRouter); // Cart-related API endpoints
 app.use("/api/order", orderRouter); // Order-related API endpoints
