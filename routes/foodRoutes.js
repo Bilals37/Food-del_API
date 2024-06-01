@@ -6,28 +6,23 @@ import path from 'path';
 
 const foodRouter = express.Router();
 
-// // Ensure the temporary upload directory exists
-// const uploadDir = '/tmp/uploads';
-// if (!fs.existsSync(uploadDir)) {
-//     fs.mkdirSync(uploadDir, { recursive: true });
-// }
+// Ensure the temporary upload directory exists
+const uploadDir = '/tmp/uploads';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// // Image Storage Engine
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, uploadDir);
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// });
-
+// Image Storage Engine
 const storage = multer.diskStorage({
-    destination: "uploads",
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
     filename: (req, file, cb) => {
-        return cb(null, `${Date.now()}${file.originalname}`)
+        cb(null, `${Date.now()}-${file.originalname}`);
     }
-})
+});
+
+
 
 const upload = multer({ storage: storage });
 
